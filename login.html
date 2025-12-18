@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SportsIn</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="index.html" class="text-2xl font-bold" style="color: #1e3a8a;">SportsIn</a>
+                <a href="register.html" class="text-gray-600 hover:underline">Need an account?</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div class="card">
+                <div class="text-center mb-6">
+                    <h2 class="text-3xl font-bold" style="color: #1e3a8a;">Welcome Back</h2>
+                    <p class="mt-2 text-gray-600">Sign in to your SportsIn account</p>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <input type="email" name="email" placeholder="Email Address" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <input type="password" name="password" placeholder="Password" required 
+                               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <button type="submit" class="w-full btn-primary py-3 rounded-lg font-bold">Sign In</button>
+                </form>
+                <div class="mt-4 text-center space-y-2">
+                    <p class="text-xs text-gray-500">No account? Register first to create your profile</p>
+                    <a href="forgot-password.html" class="text-sm text-gray-500 hover:underline block">Forgot your password?</a>
+                    <a href="admin-login.html" class="text-sm text-red-600 hover:underline block">Admin Login</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+
+
+    <script>
+        // Login functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    const email = form.querySelector('input[type="email"]').value;
+                    const password = form.querySelector('input[type="password"]').value;
+                    
+                    // Try database first, fallback to localStorage
+                    try {
+                        const response = await fetch('api.php?action=login', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({email, password})
+                        });
+                        
+                        const result = await response.json();
+                        if (result.success) {
+                            localStorage.setItem('sportsin_currentUser', JSON.stringify(result.user));
+                            window.location.href = 'dashboard.html';
+                            return;
+                        }
+                    } catch (error) {
+                        console.log('Database login failed, trying localStorage');
+                    }
+                    
+                    // Fallback to localStorage
+                    const users = JSON.parse(localStorage.getItem('sportsin_users')) || [];
+                    const user = users.find(u => u.email === email && u.password === password);
+                    if (user) {
+                        localStorage.setItem('sportsin_currentUser', JSON.stringify(user));
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        alert('Invalid email or password. Please try again.');
+                    }
+                });
+            }
+        });
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
